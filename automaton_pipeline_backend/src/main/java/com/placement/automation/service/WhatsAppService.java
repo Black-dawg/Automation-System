@@ -20,7 +20,6 @@ public class WhatsAppService {
     public void processIncomingMessage(String sender, String rawMessage) {
         System.out.println("Processing new WhatsApp message from: " + maskPhoneNumber(sender));
 
-        // 1. Is it a job posting?
         boolean isJob = messageFilterService.isJobDescription(rawMessage);
 
         if (!isJob) {
@@ -29,11 +28,9 @@ public class WhatsAppService {
             return;
         }
 
-        // 2. Alert the user that the system is processing
         System.out.println("Message accepted. Notifying user and passing to jobService...");
         whatsAppMessagingService.sendMessage(sender, "Your message has been passed to Job Controller, wait for Notion confirmation.");
 
-        // 3. Try to extract and sync with Notion
         try {
             jobService.processAndSaveNewJobMessage(rawMessage);
             System.out.println("Successfully saved job and synced with Notion!");

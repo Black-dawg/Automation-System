@@ -15,7 +15,6 @@ public class WhatsAppWebhookController {
     @Autowired
     private WhatsAppService whatsAppService;
 
-    // Secret verification token for Meta configuration
     private final String VERIFY_TOKEN = "placement_bot_123";
 
     @GetMapping("/webhook")
@@ -37,7 +36,6 @@ public class WhatsAppWebhookController {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(payload);
             
-            // Extract the messages array from WhatsApp JSON
             JsonNode entryNode = root.path("entry");
             if (entryNode.isArray() && entryNode.size() > 0) {
                 JsonNode changesNode = entryNode.get(0).path("changes");
@@ -50,12 +48,10 @@ public class WhatsAppWebhookController {
                         String sender = firstMessage.path("from").asText();
                         String messageType = firstMessage.path("type").asText("");
                         
-                        // We only process text messages
                         if ("text".equalsIgnoreCase(messageType)) {
                             String messageBody = firstMessage.path("text").path("body").asText();
                             
                             if (sender != null && !sender.isEmpty() && messageBody != null && !messageBody.isEmpty()) {
-                                // Forward to the service to handle in the background
                                 whatsAppService.processIncomingMessage(sender, messageBody);
                             }
                         } else {
@@ -69,7 +65,6 @@ public class WhatsAppWebhookController {
             e.printStackTrace();
         }
 
-        // WhatsApp needs a 200 OK back quickly
         return ResponseEntity.ok("EVENT_RECEIVED");
     }
 }
