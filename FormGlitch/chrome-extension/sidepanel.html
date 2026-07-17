@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FormGlitch</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="header-container">
+    <h1>FormGlitch</h1>
+    <button id="themeToggleBtn" class="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+      <svg id="moonIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+      </svg>
+      <svg id="sunIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+      </svg>
+    </button>
+  </header>
+  
+  <main class="container">
+    <!-- Card 1: Autofill Engine -->
+    <div class="card" aria-labelledby="engineTitle">
+      <div class="field-group">
+        <label id="engineTitle" for="modelSelect">Autofill Engine</label>
+        <select id="modelSelect">
+          <option value="">Loading engines...</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Card 2: Profile Preferences -->
+    <div class="card">
+      <div class="tabs" id="resumeTabs" role="tablist">
+        <div class="tab active" data-id="1" id="tab1" role="tab" aria-selected="true">
+          <span class="tab-name">Profile 1</span><span class="tab-status"></span>
+        </div>
+        <div class="tab" data-id="2" id="tab2" role="tab" aria-selected="false">
+          <span class="tab-name">Profile 2</span><span class="tab-status"></span>
+        </div>
+        <div class="tab" data-id="3" id="tab3" role="tab" aria-selected="false">
+          <span class="tab-name">Profile 3</span><span class="tab-status"></span>
+        </div>
+      </div>
+      
+      <div class="field-group">
+        <label for="profileName">Profile Name</label>
+        <input type="text" id="profileName" placeholder="e.g. Software Engineer" />
+      </div>
+      
+      <div class="field-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label for="resumeLink" style="margin-bottom: 0;">Resume URL (Optional)</label>
+          <a id="openLinkBtn" href="#" target="_blank" style="display: none; color: var(--accent); font-size: 0.75rem; text-decoration: none; font-weight: 600;">Open ↗</a>
+        </div>
+        <input type="url" id="resumeLink" placeholder="https://docs.google.com/..." />
+      </div>
+      
+      <div class="field-group">
+        <label>Resume Document (PDF)</label>
+        <div class="drag-drop-zone" id="dragDropZone">
+          <div class="upload-icon-container">
+            <svg class="upload-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+          </div>
+          <span class="file-upload-text">Drag & drop your resume here</span>
+          <span class="upload-subtext">or click to browse PDF</span>
+          <input type="file" id="resumeFile" accept="application/pdf" style="display: none;" />
+        </div>
+        <div id="fileStatus">No file selected</div>
+      </div>
+      
+      <div class="action-row">
+        <button id="viewJsonBtn" class="icon-btn" title="View Profile Data" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button id="downloadJsonBtn" class="icon-btn" title="Download Profile Data" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+        </button>
+        <button id="clearCacheBtn" class="icon-btn" title="Clear Profile Data" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
+          </svg>
+        </button>
+      </div>
+      
+      <button id="saveResumeBtn" class="secondary" style="margin-top: 4px;">Save Profile Details</button>
+    </div>
+    
+    <!-- Card 3: Application Preferences -->
+    <div class="card" aria-labelledby="preferencesTitle">
+      <div class="field-group">
+        <label id="preferencesTitle" for="presetInfo">Application Preferences</label>
+        <textarea id="presetInfo" placeholder="Will relocate: Yes. Require Sponsorship: No."></textarea>
+      </div>
+      <button id="savePresetBtn" class="secondary">Save Preferences</button>
+    </div>
+  </main>
+  
+  <!-- Main Action Panel -->
+  <div class="actions-panel">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; margin-bottom: 12px; gap: 12px;">
+      <button id="parseAiBtn" style="flex: 1; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); color: #ffffff; border: none; box-shadow: 0 4px 14px var(--accent-glow);">Sync Profile</button>
+      <div id="syncIndicator" title="Profile has unsynced changes. Click Sync Profile to update.">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12l4 4 8-8" />
+          <path d="M9 12l4 4 8-8" />
+        </svg>
+      </div>
+    </div>
+    <button id="autofillBtn">Auto-Fill Current Form</button>
+  </div>
+  
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="jsonModal" class="modal-overlay" aria-hidden="true" role="dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Cached Profile Data</h3>
+        <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="jsonDisplay"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
