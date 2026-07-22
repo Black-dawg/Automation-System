@@ -1,0 +1,67 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-south1
+  SERVICE: placement-backend
+  IMAGE: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/placement-repo/backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: github-deployer@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t $IMAGE:${{ github.sha }} \
+            -t $IMAGE:latest \
+            ./automaton_pipeline_backend
+
+      - name: Push Docker Image
+        run: |
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE \
+            --image=$IMAGE:${{ github.sha }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,SPRING_DATASOURCE_URL=SPRING_DATASOURCE_URL:latest,SPRING_DATASOURCE_PASSWORD=SPRING_DATASOURCE_PASSWORD:latest,NOTION_API_TOKEN=NOTION_API_TOKEN:latest,NOTION_DATABASE_ID=NOTION_DATABASE_ID:latest \
+            --set-env-vars=SPRING_DATASOURCE_USERNAME=postgres \
+            --memory=512Mi \
+            --min-instances=0 \
+            --max-instances=3
+
+      - name: Get Service URL
+        run: |
+          gcloud run services describe $SERVICE \
+            --region=$REGION \
+            --format='value(status.url)'
