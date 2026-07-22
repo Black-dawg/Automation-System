@@ -28,7 +28,6 @@ public class MessageFilterService {
 
             return response != null && response.trim().toLowerCase().contains("yes");
         } catch (Exception e) {
-            System.err.println("Error filtering message: " + e.getMessage());
             return false;
         }
     }

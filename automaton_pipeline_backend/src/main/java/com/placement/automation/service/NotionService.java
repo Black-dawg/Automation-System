@@ -30,7 +30,6 @@ public class NotionService {
 
     public void syncJobToNotion(JobOpportunityEntity job) {
         if (notionApiToken == null || notionApiToken.trim().isEmpty() || notionApiToken.contains("YOUR_NOTION_INTEGRATION_TOKEN")) {
-            System.out.println("Notion API Token not configured. Skipping sync.");
             return;
         }
 
@@ -42,45 +41,36 @@ public class NotionService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> body = new HashMap<>();
-        
+
         Map<String, Object> parent = new HashMap<>();
         parent.put("database_id", notionDatabaseId);
         body.put("parent", parent);
 
         Map<String, Object> properties = new HashMap<>();
 
-        if (job.getCompanyName() != null) {
+        if (job.getCompanyName() != null)
             properties.put("Company", createTitleProperty(job.getCompanyName()));
-        }
-        if (job.getRole() != null) {
+        if (job.getRole() != null)
             properties.put("Role", createRichTextProperty(job.getRole()));
-        }
-        if (job.getEligibilityCriteria() != null) {
+        if (job.getEligibilityCriteria() != null)
             properties.put("Eligibility", createRichTextProperty(job.getEligibilityCriteria()));
-        }
-        if (job.getApplicationLinks() != null && !job.getApplicationLinks().isEmpty()) {
+        if (job.getApplicationLinks() != null && !job.getApplicationLinks().isEmpty())
             properties.put("Form", createRichTextProperty(formatLinks(job.getApplicationLinks())));
-        }
-        if (job.getWhatsappGroupLinks() != null && !job.getWhatsappGroupLinks().isEmpty()) {
+        if (job.getWhatsappGroupLinks() != null && !job.getWhatsappGroupLinks().isEmpty())
             properties.put("WhatsApp", createRichTextProperty(formatLinks(job.getWhatsappGroupLinks())));
-        }
-        if (job.getExtraImportantInfo() != null) {
+        if (job.getExtraImportantInfo() != null)
             properties.put("Extra Info", createRichTextProperty(job.getExtraImportantInfo()));
-        }
-        if (job.getDeadline() != null) {
+        if (job.getDeadline() != null)
             properties.put("DeadLine", createRichTextProperty(job.getDeadline()));
-        }
-        if (job.getOffer() != null) {
+        if (job.getOffer() != null)
             properties.put("Offer", createRichTextProperty(job.getOffer()));
-        }
 
         body.put("properties", properties);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-            System.out.println("Successfully synced job to Notion: " + response.getStatusCode());
+            restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         } catch (Exception e) {
             System.err.println("Failed to sync to Notion: " + e.getMessage());
         }

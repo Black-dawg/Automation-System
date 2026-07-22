@@ -21,25 +21,16 @@ public class JobService {
     }
 
     public JobOpportunityEntity createJob(JobOpportunityEntity job) {
-
-        JobOpportunityEntity savedJob = repository.save(job);
-
-        notionService.syncJobToNotion(savedJob);
-
-        return savedJob;
+        JobOpportunityEntity saved = repository.save(job);
+        notionService.syncJobToNotion(saved);
+        return saved;
     }
 
     public JobOpportunityEntity processAndSaveNewJobMessage(String rawMessage) {
-
-         JobOpportunity extractedJob = messageExtractionService.extractJobOpportunity(rawMessage);
-
-         JobOpportunityEntity entity = JobOpportunityEntity.from(extractedJob);
-
-
-        JobOpportunityEntity savedEntity = repository.save(entity);
-
-         notionService.syncJobToNotion(savedEntity);
-
-        return savedEntity;
+        JobOpportunity extracted = messageExtractionService.extractJobOpportunity(rawMessage);
+        JobOpportunityEntity entity = JobOpportunityEntity.from(extracted);
+        JobOpportunityEntity saved = repository.save(entity);
+        notionService.syncJobToNotion(saved);
+        return saved;
     }
 }

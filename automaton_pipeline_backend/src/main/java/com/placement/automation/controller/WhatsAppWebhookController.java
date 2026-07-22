@@ -3,19 +3,19 @@ package com.placement.automation.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.placement.automation.service.WhatsAppService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/whatsapp")
+@RequiredArgsConstructor
 public class WhatsAppWebhookController {
 
-    @Autowired
-    private WhatsAppService whatsAppService;
+    private final WhatsAppService whatsAppService;
 
-    private final String VERIFY_TOKEN = "placement_bot_123";
+    private static final String VERIFY_TOKEN = "placement_bot_123";
 
     @GetMapping("/webhook")
     public ResponseEntity<String> verifyWebhook(
@@ -25,9 +25,8 @@ public class WhatsAppWebhookController {
 
         if ("subscribe".equals(mode) && VERIFY_TOKEN.equals(token)) {
             return ResponseEntity.ok(challenge);
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/webhook")
@@ -35,34 +34,30 @@ public class WhatsAppWebhookController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(payload);
-            
+
             JsonNode entryNode = root.path("entry");
             if (entryNode.isArray() && entryNode.size() > 0) {
                 JsonNode changesNode = entryNode.get(0).path("changes");
                 if (changesNode.isArray() && changesNode.size() > 0) {
                     JsonNode valueNode = changesNode.get(0).path("value");
                     JsonNode messagesNode = valueNode.path("messages");
-                    
+
                     if (messagesNode.isArray() && messagesNode.size() > 0) {
                         JsonNode firstMessage = messagesNode.get(0);
                         String sender = firstMessage.path("from").asText();
                         String messageType = firstMessage.path("type").asText("");
-                        
+
                         if ("text".equalsIgnoreCase(messageType)) {
                             String messageBody = firstMessage.path("text").path("body").asText();
-                            
-                            if (sender != null && !sender.isEmpty() && messageBody != null && !messageBody.isEmpty()) {
+                            if (!sender.isEmpty() && !messageBody.isEmpty()) {
                                 whatsAppService.processIncomingMessage(sender, messageBody);
                             }
-                        } else {
-                            System.out.println("Received non-text message type: " + messageType);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error parsing incoming WhatsApp payload: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error parsing WhatsApp payload: " + e.getMessage());
         }
 
         return ResponseEntity.ok("EVENT_RECEIVED");

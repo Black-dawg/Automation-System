@@ -23,7 +23,6 @@ public class WhatsAppMessagingService {
 
     public void sendMessage(String recipientPhoneNumber, String messageText) {
         if (apiToken == null || apiToken.isEmpty() || phoneNumberId == null || phoneNumberId.isEmpty()) {
-            System.out.println("WhatsApp config missing! Make sure to set token and phone-number-id.");
             return;
         }
 
@@ -47,23 +46,9 @@ public class WhatsAppMessagingService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            System.out.println("Sending message to " + maskPhoneNumber(recipientPhoneNumber) + ": " + messageText);
             restTemplate.postForEntity(url, entity, String.class);
         } catch (Exception e) {
             System.err.println("Failed to send WhatsApp message: " + e.getMessage());
-            e.printStackTrace();
         }
-    }
-
-    private String maskPhoneNumber(String num) {
-        if (num == null || num.length() <= 4) {
-            return num;
-        }
-        StringBuilder masked = new StringBuilder();
-        for (int i = 0; i < num.length() - 4; i++) {
-            masked.append("X");
-        }
-        masked.append(num.substring(num.length() - 4));
-        return masked.toString();
     }
 }
