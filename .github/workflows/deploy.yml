@@ -58,7 +58,7 @@ jobs:
             --allow-unauthenticated \
             --set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,SPRING_DATASOURCE_URL=SPRING_DATASOURCE_URL:latest,SPRING_DATASOURCE_PASSWORD=SPRING_DATASOURCE_PASSWORD:latest,NOTION_API_TOKEN=NOTION_API_TOKEN:latest,NOTION_DATABASE_ID=NOTION_DATABASE_ID:latest \
             --set-env-vars=SPRING_DATASOURCE_USERNAME=postgres \
-            --memory=512Mi \
+            --memory=1Gi \
             --min-instances=0 \
             --max-instances=3
 
