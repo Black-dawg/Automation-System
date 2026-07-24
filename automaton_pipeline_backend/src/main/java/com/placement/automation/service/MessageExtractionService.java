@@ -25,10 +25,10 @@ public class MessageExtractionService {
                         - 'offer': Extract any compensation details (Salary, CTC, Stipend, hourly rate, etc.).
                         
                         CRITICAL URL INSTRUCTIONS:
-                        - You MUST extract the EXACT, full, complete URLs (including the https:// and all parameters/paths) exactly as they appear in the source message text.
+                        - You MUST extract the EXACT, full, complete URLs exactly as they appear in the source message text.
                         - NEVER truncate, shorten, or summarize URLs (e.g., do NOT output 'https://...' or 'https:').
-                        - Do NOT make up or alter the URLs.
-                        - For 'applicationLinks' and 'whatsappGroupLinks', return a key-value map. The key should be a descriptive label found in the text (like "Google Form" or "RM"), and the value MUST be the actual complete literal URL.
+                        - IMPORTANT JSON FORMATTING: You must escape all forward slashes in URLs to prevent JSON parser issues (e.g., output "https:\\/\\/example.com" instead of "https://example.com"). Do NOT output unescaped double slashes (//) anywhere.
+                        - For 'applicationLinks' and 'whatsappGroupLinks', return a key-value map. The key should be a descriptive label found in the text (like "Google Form" or "RM"), and the value MUST be the actual complete literal URL (with escaped slashes).
                         Return the data strictly in the requested JSON structure.
                         """)
                 .user(rawMessage)
