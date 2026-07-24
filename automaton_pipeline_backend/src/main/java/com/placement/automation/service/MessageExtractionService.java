@@ -23,6 +23,7 @@ public class MessageExtractionService {
                         FIELD SPECIFICS:
                         - 'companyName': Extract the name of the company hiring. The company name is typically located on the very first line of the message. If the first line contains multiple pieces of information enclosed in symbols (like asterisks), isolate and extract only the company name portion.
                         - 'offer': Extract any compensation details (Salary, CTC, Stipend, hourly rate, etc.).
+                        - 'deadline': Format all deadlines strictly as 'DD Month YYYY, HH:MM AM/PM' (e.g., '23rd July 2026, 11:00 AM'). Always place the day before the month and do not include seconds in the time.
                         
                         CRITICAL URL INSTRUCTIONS:
                         - You MUST extract the EXACT, full, complete URLs exactly as they appear in the source message text.
