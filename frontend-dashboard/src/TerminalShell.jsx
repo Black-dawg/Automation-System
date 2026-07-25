@@ -283,7 +283,7 @@ const TerminalShell = () => {
 
   const PROMPT = '\r\n\x1b[32muser@host\x1b[0m:\x1b[34m~\x1b[0m$ ';
 
-  const renderBanner = (term) => {
+  const renderAsciiArt = (term) => {
     term.writeln('\x1b[32m  ███  ███  ████     █████ ████   ███   ███  █   █ █████ ████  \x1b[0m');
     term.writeln('\x1b[32m   █  █   █ █   █      █   █   █ █   █ █     █  █  █     █   █ \x1b[0m');
     term.writeln('\x1b[32m   █  █   █ ████       █   ████  █████ █     ███   ████  ████  \x1b[0m');
@@ -291,9 +291,20 @@ const TerminalShell = () => {
     term.writeln('\x1b[32m ██    ███  ████       █   █   █ █   █  ███  █   █ █████ █   █ \x1b[0m');
     term.writeln('');
     term.writeln('\x1b[1;32m[Placement Automation Bot v2.0 - xterm.js Engine]\x1b[0m');
+  };
+
+  const renderBanner = (term) => {
+    renderAsciiArt(term);
     term.writeln(`Connected Host: \x1b[36m${API_BASE_URL}\x1b[0m`);
     term.writeln('Type \x1b[33mhelp\x1b[0m to see available commands.');
     term.write(PROMPT);
+  };
+
+  const renderAuthScreen = (term) => {
+    renderAsciiArt(term);
+    term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Authentication Required]\x1b[0m');
+    term.writeln('Terminal shell is password protected.');
+    term.write(AUTH_PROMPT);
   };
 
   useEffect(() => {
@@ -330,9 +341,7 @@ const TerminalShell = () => {
       renderBanner(term);
     } else {
       shellMode.current = 'AUTH';
-      term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Authentication Required]\x1b[0m');
-      term.writeln('Terminal shell is password protected.');
-      term.write(AUTH_PROMPT);
+      renderAuthScreen(term);
     }
 
     const handleResize = () => {
@@ -435,7 +444,8 @@ const TerminalShell = () => {
               sessionStorage.setItem('terminal_auth', 'true');
               shellMode.current = 'CMD';
               playRetroBootSound();
-              term.writeln('');
+              term.write('\r\x1b[K');
+              term.clear();
               term.writeln('\x1b[1;32m[ACCESS GRANTED] Terminal Unlocked.\x1b[0m\r\n');
               renderBanner(term);
             } else {
@@ -580,9 +590,7 @@ const TerminalShell = () => {
       shellMode.current = 'AUTH';
       term.write('\r\x1b[K');
       term.clear();
-      term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Session Locked]\x1b[0m');
-      term.writeln('Logged out. Enter password to authenticate.');
-      term.write(AUTH_PROMPT);
+      renderAuthScreen(term);
       return;
     }
 
