@@ -9,7 +9,7 @@ const DASHBOARD_PASSWORD = import.meta.env.VITE_DASHBOARD_PASSWORD || 'interview
 const NOTION_URL = import.meta.env.VITE_NOTION_URL || 'https://app.notion.com/p/Job-Application-Tracker-9bd515136456828198180166c578cf07';
 const AUTH_PROMPT = '\r\n\x1b[33mPasscode:\x1b[0m ';
 
-// Middle-Left Notion ASCII Hyperlink Component
+// Middle-Left Notion ASCII Hyperlink Component with glowing white hover shine
 const NotionAsciiLink = () => {
   const [hovered, setHovered] = React.useState(false);
 
@@ -38,10 +38,12 @@ const NotionAsciiLink = () => {
         fontFamily: 'monospace',
         fontSize: '12px',
         lineHeight: '1.05',
-        color: '#27c93f',
+        color: hovered ? '#ffffff' : '#27c93f',
         margin: 0,
         whiteSpace: 'pre',
-        userSelect: 'none'
+        userSelect: 'none',
+        transition: 'color 0.25s ease, text-shadow 0.25s ease',
+        textShadow: hovered ? '0 0 12px #ffffff, 0 0 20px #ffffff' : '0 0 8px rgba(39, 201, 63, 0.4)',
       }}>
 {`█  █  ███  █████ █  ███  █  █ ↗
 ██░█ █   █   █   █ █   █ ██░█  
@@ -52,8 +54,8 @@ const NotionAsciiLink = () => {
         fontFamily: 'monospace',
         fontSize: '10px',
         letterSpacing: '3px',
-        color: hovered ? '#27c93f' : 'rgba(39, 201, 63, 0.5)',
-        textShadow: hovered ? '0 0 6px #27c93f, 0 0 10px rgba(39,201,63,0.5)' : 'none',
+        color: hovered ? '#ffffff' : 'rgba(39, 201, 63, 0.7)',
+        textShadow: hovered ? '0 0 10px #ffffff' : 'none',
         marginTop: '6px',
         textTransform: 'uppercase',
         transition: 'all 0.25s ease',
@@ -64,7 +66,7 @@ const NotionAsciiLink = () => {
   );
 };
 
-// Bottom-Left BY KJ ASCII Art Component
+// Bottom-Left BY KJ ASCII Art Component with glowing white hover shine
 const ByKjAscii = () => {
   const [hovered, setHovered] = React.useState(false);
 
@@ -78,20 +80,23 @@ const ByKjAscii = () => {
         bottom: '28px',
         left: '36px',
         zIndex: 100,
-        opacity: 0.85,
+        opacity: hovered ? 1 : 0.85,
         padding: '8px',
         borderRadius: '6px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        transition: 'opacity 0.25s ease',
       }}
     >
       <pre style={{
         fontFamily: 'monospace',
         fontSize: '16px',
         lineHeight: '1.05',
-        color: '#27c93f',
+        color: hovered ? '#ffffff' : '#27c93f',
         margin: 0,
         whiteSpace: 'pre',
-        userSelect: 'none'
+        userSelect: 'none',
+        transition: 'color 0.25s ease, text-shadow 0.25s ease',
+        textShadow: hovered ? '0 0 12px #ffffff, 0 0 20px #ffffff' : '0 0 8px rgba(39, 201, 63, 0.4)',
       }}>
 {`▓▓▓▓  ▓   ▓       ▓   ▓   ▓▓▓   
 ▓░░░▓  ▓ ▓ ░      ▓░ ▓ ░   ▓░░  
@@ -105,8 +110,8 @@ const ByKjAscii = () => {
         fontFamily: 'monospace',
         fontSize: '11px',
         letterSpacing: '2px',
-        color: hovered ? '#27c93f' : 'rgba(39,201,63,0.6)',
-        textShadow: hovered ? '0 0 6px #27c93f, 0 0 10px rgba(39,201,63,0.5)' : 'none',
+        color: hovered ? '#ffffff' : 'rgba(39,201,63,0.8)',
+        textShadow: hovered ? '0 0 10px #ffffff' : 'none',
         marginTop: '6px',
         textAlign: 'right',
         transition: 'all 0.25s ease',
