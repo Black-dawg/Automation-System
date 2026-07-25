@@ -9,7 +9,7 @@ const DASHBOARD_PASSWORD = import.meta.env.VITE_DASHBOARD_PASSWORD || 'interview
 const NOTION_URL = import.meta.env.VITE_NOTION_URL || 'https://app.notion.com/p/Job-Application-Tracker-9bd515136456828198180166c578cf07';
 const AUTH_PROMPT = '\r\n\x1b[33mPasscode:\x1b[0m ';
 
-// Middle-Left Notion ASCII Hyperlink Component with borderless layout and hover color glow
+// Middle-Left Notion ASCII Hyperlink Component
 const NotionAsciiLink = () => {
   const [hovered, setHovered] = React.useState(false);
 
@@ -38,12 +38,10 @@ const NotionAsciiLink = () => {
         fontFamily: 'monospace',
         fontSize: '12px',
         lineHeight: '1.05',
-        color: hovered ? '#ffffff' : '#27c93f',
+        color: '#27c93f',
         margin: 0,
         whiteSpace: 'pre',
-        userSelect: 'none',
-        transition: 'color 0.25s ease, text-shadow 0.25s ease',
-        textShadow: hovered ? '0 0 12px #ffffff, 0 0 20px #ffffff' : '0 0 8px rgba(39, 201, 63, 0.4)',
+        userSelect: 'none'
       }}>
 {`█  █  ███  █████ █  ███  █  █ ↗
 ██░█ █   █   █   █ █   █ ██░█  
@@ -54,14 +52,68 @@ const NotionAsciiLink = () => {
         fontFamily: 'monospace',
         fontSize: '10px',
         letterSpacing: '3px',
-        color: hovered ? '#ffffff' : 'rgba(39, 201, 63, 0.7)',
+        color: hovered ? '#27c93f' : 'rgba(39, 201, 63, 0.5)',
+        textShadow: hovered ? '0 0 6px #27c93f, 0 0 10px rgba(39,201,63,0.5)' : 'none',
         marginTop: '6px',
         textTransform: 'uppercase',
-        transition: 'color 0.25s ease',
+        transition: 'all 0.25s ease',
       }}>
         notion dashboard
       </div>
     </a>
+  );
+};
+
+// Bottom-Left BY KJ ASCII Art Component
+const ByKjAscii = () => {
+  const [hovered, setHovered] = React.useState(false);
+
+  return (
+    <div 
+      className="cursor-target"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'fixed',
+        bottom: '28px',
+        left: '36px',
+        zIndex: 100,
+        opacity: 0.85,
+        padding: '8px',
+        borderRadius: '6px',
+        cursor: 'pointer'
+      }}
+    >
+      <pre style={{
+        fontFamily: 'monospace',
+        fontSize: '16px',
+        lineHeight: '1.05',
+        color: '#27c93f',
+        margin: 0,
+        whiteSpace: 'pre',
+        userSelect: 'none'
+      }}>
+{`▓▓▓▓  ▓   ▓       ▓   ▓   ▓▓▓   
+▓░░░▓  ▓ ▓ ░      ▓░ ▓ ░   ▓░░  
+▓▓▓▓░░  ▓ ░ ░     ▓▓▓ ░ ░  ▓░░░ 
+▓░░░▓ ░ ▓░ ░      ▓░░▓ ░▓  ▓░░  
+▓▓▓▓░░  ▓░░       ▓░░░▓  ▓▓ ░░  
+ ░░░░ ░  ░░        ░░  ░  ░░ ░  
+  ░░░░    ░         ░   ░  ░░   `}
+      </pre>
+      <div style={{
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        letterSpacing: '2px',
+        color: hovered ? '#27c93f' : 'rgba(39,201,63,0.6)',
+        textShadow: hovered ? '0 0 6px #27c93f, 0 0 10px rgba(39,201,63,0.5)' : 'none',
+        marginTop: '6px',
+        textAlign: 'right',
+        transition: 'all 0.25s ease',
+      }}>
+        with ❤️
+      </div>
+    </div>
   );
 };
 
@@ -859,7 +911,6 @@ const TerminalShell = () => {
 
       clearInterval(logInterval);
 
-      // Flush remaining logs
       while (logIdx < dummyLogs.length) {
         term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
         logIdx++;
@@ -944,46 +995,7 @@ const TerminalShell = () => {
       <NotionAsciiLink />
 
       {/* Bottom-Left BY KJ ASCII Art */}
-      <div 
-        className="cursor-target"
-        style={{
-          position: 'fixed',
-          bottom: '28px',
-          left: '36px',
-          zIndex: 100,
-          opacity: 0.85,
-          padding: '8px',
-          borderRadius: '6px'
-        }}
-      >
-        <pre style={{
-          fontFamily: 'monospace',
-          fontSize: '16px',
-          lineHeight: '1.05',
-          color: '#27c93f',
-          margin: 0,
-          whiteSpace: 'pre',
-          userSelect: 'none'
-        }}>
-{`▓▓▓▓  ▓   ▓       ▓   ▓   ▓▓▓   
-▓░░░▓  ▓ ▓ ░      ▓░ ▓ ░   ▓░░  
-▓▓▓▓░░  ▓ ░ ░     ▓▓▓ ░ ░  ▓░░░ 
-▓░░░▓ ░ ▓░ ░      ▓░░▓ ░▓  ▓░░  
-▓▓▓▓░░  ▓░░       ▓░░░▓  ▓▓ ░░  
- ░░░░ ░  ░░        ░░  ░  ░░ ░  
-  ░░░░    ░         ░   ░  ░░   `}
-        </pre>
-        <div style={{
-          fontFamily: 'monospace',
-          fontSize: '11px',
-          letterSpacing: '2px',
-          color: 'rgba(39,201,63,0.8)',
-          marginTop: '6px',
-          textAlign: 'right',
-        }}>
-          with ❤️
-        </div>
-      </div>
+      <ByKjAscii />
 
       <div style={{ 
         position: 'relative', 
