@@ -570,7 +570,10 @@ const TerminalShell = () => {
               renderBanner(term);
             } else {
               term.writeln('');
-              term.writeln('\x1b[1;31m[ACCESS DENIED] Invalid Passcode.\x1b[0m');
+              term.writeln('\x1b[90m[SEC] Authentication handshake initiated...\x1b[0m');
+              term.writeln('\x1b[90m[CRYPTO] Verifying SHA-256 password digest...\x1b[0m');
+              term.writeln('\x1b[1;31m[ACCESS DENIED]\x1b[0m Invalid Passcode Credentials.');
+              term.writeln('\x1b[90m[ABORT] Security protocol engaged. Retry passcode.\x1b[0m');
               term.write(AUTH_PROMPT);
             }
             break;
@@ -792,11 +795,15 @@ const TerminalShell = () => {
             }
           }
         } else {
-          term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m HTTP ${response.status} - Failed to fetch jobs.`);
+          term.writeln(`\r\n\x1b[90m[SYS] Server responded with HTTP status ${response.status}\x1b[0m`);
+          term.writeln(`\x1b[1;31m[ERROR ${response.status}]\x1b[0m Failed to fetch jobs list.`);
+          term.writeln(`\x1b[90m[ABORT] Data stream terminated.\x1b[0m`);
         }
       } catch (err) {
         clearInterval(logInterval);
-        term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Connection refused (${API_BASE_URL}/api/job)`);
+        term.writeln(`\r\n\x1b[90m[NET] Socket connection failure to remote host...\x1b[0m`);
+        term.writeln(`\x1b[1;31m[ERROR 503]\x1b[0m Connection refused (${API_BASE_URL}/api/job)`);
+        term.writeln(`\x1b[90m[ABORT] Remote endpoint unreachable.\x1b[0m`);
       } finally {
         clearInterval(logInterval);
         shellMode.current = 'CMD';
@@ -810,7 +817,10 @@ const TerminalShell = () => {
       const rawId = parts[1];
 
       if (!rawId || parts.length > 2) {
-        term.writeln('\r\n\x1b[31m[Syntax Error]\x1b[0m Invalid syntax. Usage: \x1b[33mshow <id>\x1b[0m (e.g. \x1b[36mshow 28\x1b[0m)');
+        term.writeln('\r\n\x1b[90m[SYS] Analyzing token structure...\x1b[0m');
+        term.writeln('\x1b[90m[PARSER] Unexpected arguments count in statement\x1b[0m');
+        term.writeln('\x1b[1;31m[Syntax Error 400]\x1b[0m Invalid syntax. Usage: \x1b[33mshow <id>\x1b[0m (e.g. \x1b[36mshow 28\x1b[0m)');
+        term.writeln('\x1b[90m[ABORT] Command execution terminated.\x1b[0m');
         term.write(PROMPT);
         return;
       }
@@ -818,7 +828,10 @@ const TerminalShell = () => {
       // Strict validation: must be positive integer digits like "28" or "<28>"
       const match = rawId.match(/^(?:<(\d+)>|(\d+))$/);
       if (!match) {
-        term.writeln(`\r\n\x1b[31m[Syntax Error]\x1b[0m Invalid Job ID '\x1b[33m${rawId}\x1b[0m'. Must be a numeric ID (e.g. \x1b[36mshow 28\x1b[0m).`);
+        term.writeln(`\r\n\x1b[90m[SYS] Parsing primary key token: '${rawId}'...\x1b[0m`);
+        term.writeln(`\x1b[90m[PARSER] Lexical check failed: token contains non-integer characters\x1b[0m`);
+        term.writeln(`\x1b[1;31m[Syntax Error 400]\x1b[0m Invalid Job ID '\x1b[33m${rawId}\x1b[0m'. Must be a numeric ID (e.g. \x1b[36mshow 28\x1b[0m).`);
+        term.writeln(`\x1b[90m[ABORT] Query halted due to strict validation policy.\x1b[0m`);
         term.write(PROMPT);
         return;
       }
@@ -859,13 +872,20 @@ const TerminalShell = () => {
           await typeWriter(term, jsonString, 1);
           term.writeln('\r\n');
         } else if (response.status === 404) {
-          term.writeln(`\r\n\x1b[1;31m[404 NOT FOUND]\x1b[0m No record matches ID ${id}.`);
+          term.writeln(`\r\n\x1b[90m[DB] SELECT * FROM job_opportunities WHERE id = ${id}\x1b[0m`);
+          term.writeln(`\x1b[90m[NET] Query returned 0 matching rows (0.00ms)\x1b[0m`);
+          term.writeln(`\x1b[1;31m[404 NOT FOUND]\x1b[0m EntityNotFoundException: No record matches ID ${id}.`);
+          term.writeln(`\x1b[90m[ABORT] Record lookup failed.\x1b[0m`);
         } else {
-          term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Server returned status ${response.status}.`);
+          term.writeln(`\r\n\x1b[90m[SYS] Cluster returned response status: ${response.status}\x1b[0m`);
+          term.writeln(`\x1b[1;31m[ERROR ${response.status}]\x1b[0m Server failed to complete request.`);
+          term.writeln(`\x1b[90m[ABORT] Execution aborted.\x1b[0m`);
         }
       } catch (err) {
         clearInterval(logInterval);
-        term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Could not connect to backend (${API_BASE_URL}/api/job/${id})`);
+        term.writeln(`\r\n\x1b[90m[NET] Socket transport error to backend cluster...\x1b[0m`);
+        term.writeln(`\x1b[1;31m[ERROR 503]\x1b[0m Connection refused (${API_BASE_URL}/api/job/${id})`);
+        term.writeln(`\x1b[90m[ABORT] Remote endpoint unreachable.\x1b[0m`);
       } finally {
         clearInterval(logInterval);
         shellMode.current = 'CMD';
@@ -875,7 +895,10 @@ const TerminalShell = () => {
     }
 
     term.writeln('');
-    term.writeln(`\x1b[31mCommand not found:\x1b[0m ${cmd}`);
+    term.writeln(`\x1b[90m[SYS] Command parser evaluated input: '${cmd}'\x1b[0m`);
+    term.writeln(`\x1b[90m[SHELL] Entry point not recognized in registry\x1b[0m`);
+    term.writeln(`\x1b[1;31m[Command Not Found]\x1b[0m '${cmd}' is not recognized. Type \x1b[33mhelp\x1b[0m for options.`);
+    term.writeln(`\x1b[90m[ABORT] Execution halted.\x1b[0m`);
     term.write(PROMPT);
   };
 
@@ -942,11 +965,15 @@ const TerminalShell = () => {
         term.writeln('\r\n');
       } else {
         const errorText = await response.text();
-        term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m ${errorText}`);
+        term.writeln(`\r\n\x1b[90m[SYS] Extraction pipeline returned non-201 response\x1b[0m`);
+        term.writeln(`\x1b[1;31m[ERROR ${response.status}]\x1b[0m ${errorText}`);
+        term.writeln(`\x1b[90m[ABORT] Pipeline process terminated.\x1b[0m`);
       }
     } catch (err) {
       clearInterval(logInterval);
-      term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Could not reach backend pipeline (${err.message})`);
+      term.writeln(`\r\n\x1b[90m[NET] Extraction socket error to remote host...\x1b[0m`);
+      term.writeln(`\x1b[1;31m[ERROR 503]\x1b[0m Could not reach backend pipeline (${err.message})`);
+      term.writeln(`\x1b[90m[ABORT] Transmission failed.\x1b[0m`);
     } finally {
       clearInterval(logInterval);
       shellMode.current = 'CMD';
