@@ -5,6 +5,8 @@ import 'xterm/css/xterm.css';
 import TargetCursor from './TargetCursor';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://placement-backend-6y45zizfcq-el.a.run.app').replace(/\/$/, '');
+const DASHBOARD_PASSWORD = import.meta.env.VITE_DASHBOARD_PASSWORD || 'interview';
+const AUTH_PROMPT = '\r\n\x1b[33mPasscode:\x1b[0m ';
 
 // Aero-Grid Radar Canvas component for hardware dashboard visualizer
 const RadarDisplay = () => {
@@ -271,7 +273,7 @@ const TerminalShell = () => {
   const xtermRef = useRef(null);
   const fitAddonRef = useRef(null);
 
-  const shellMode = useRef('CMD');
+  const shellMode = useRef('AUTH'); // 'AUTH', 'CMD', 'POSTING', 'PROCESSING'
   const commandHistory = useRef([]);
   const historyIndex = useRef(-1);
 
@@ -280,6 +282,19 @@ const TerminalShell = () => {
   const typeAndExecuteRef = useRef(null);
 
   const PROMPT = '\r\n\x1b[32muser@host\x1b[0m:\x1b[34m~\x1b[0m$ ';
+
+  const renderBanner = (term) => {
+    term.writeln('\x1b[32m  ███  ███  ████     █████ ████   ███   ███  █   █ █████ ████  \x1b[0m');
+    term.writeln('\x1b[32m   █  █   █ █   █      █   █   █ █   █ █     █  █  █     █   █ \x1b[0m');
+    term.writeln('\x1b[32m   █  █   █ ████       █   ████  █████ █     ███   ████  ████  \x1b[0m');
+    term.writeln('\x1b[32m█  █  █   █ █   █      █   █  █  █   █ █     █  █  █     █  █  \x1b[0m');
+    term.writeln('\x1b[32m ██    ███  ████       █   █   █ █   █  ███  █   █ █████ █   █ \x1b[0m');
+    term.writeln('');
+    term.writeln('\x1b[1;32m[Placement Automation Bot v2.0 - xterm.js Engine]\x1b[0m');
+    term.writeln(`Connected Host: \x1b[36m${API_BASE_URL}\x1b[0m`);
+    term.writeln('Type \x1b[33mhelp\x1b[0m to see available commands.');
+    term.write(PROMPT);
+  };
 
   useEffect(() => {
     const term = new Terminal({
@@ -309,17 +324,16 @@ const TerminalShell = () => {
     xtermRef.current = term;
     fitAddonRef.current = fitAddon;
 
-    term.writeln('\x1b[32m  ███  ███  ████     █████ ████   ███   ███  █   █ █████ ████  \x1b[0m');
-    term.writeln('\x1b[32m   █  █   █ █   █      █   █   █ █   █ █     █  █  █     █   █ \x1b[0m');
-    term.writeln('\x1b[32m   █  █   █ ████       █   ████  █████ █     ███   ████  ████  \x1b[0m');
-    term.writeln('\x1b[32m█  █  █   █ █   █      █   █  █  █   █ █     █  █  █     █  █  \x1b[0m');
-    term.writeln('\x1b[32m ██    ███  ████       █   █   █ █   █  ███  █   █ █████ █   █ \x1b[0m');
-    term.writeln('');
-    term.writeln('');
-    term.writeln('\x1b[1;32m[Placement Automation Bot v2.0 - xterm.js Engine]\x1b[0m');
-    term.writeln(`Connected Host: \x1b[36m${API_BASE_URL}\x1b[0m`);
-    term.writeln('Type \x1b[33mhelp\x1b[0m to see available commands.');
-    term.write(PROMPT);
+    const isAuthed = sessionStorage.getItem('terminal_auth') === 'true';
+    if (isAuthed) {
+      shellMode.current = 'CMD';
+      renderBanner(term);
+    } else {
+      shellMode.current = 'AUTH';
+      term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Authentication Required]\x1b[0m');
+      term.writeln('Terminal shell is password protected.');
+      term.write(AUTH_PROMPT);
+    }
 
     const handleResize = () => {
       try {
@@ -346,7 +360,7 @@ const TerminalShell = () => {
     };
 
     typeAndExecuteRef.current = async (cmd) => {
-      if (shellMode.current === 'PROCESSING') return;
+      if (shellMode.current === 'AUTH' || shellMode.current === 'PROCESSING') return;
       if (shellMode.current === 'POSTING') {
         shellMode.current = 'CMD';
       }
@@ -385,7 +399,11 @@ const TerminalShell = () => {
 
       if (cursorPosition > 0) term.write('\b'.repeat(cursorPosition));
       term.write('\x1b[K');
-      term.write(newBuffer);
+      if (shellMode.current === 'AUTH') {
+        term.write('*'.repeat(newBuffer.length));
+      } else {
+        term.write(newBuffer);
+      }
       if (after.length > 0) term.write('\b'.repeat(after.length));
 
       inputBuffer = newBuffer;
@@ -403,6 +421,43 @@ const TerminalShell = () => {
 
     term.onData(data => {
       if (shellMode.current === 'PROCESSING') return;
+
+      if (shellMode.current === 'AUTH') {
+        for (let i = 0; i < data.length; i++) {
+          const char = data[i];
+          if (char === '\r') {
+            playRetroClick();
+            const enteredPass = inputBuffer;
+            inputBuffer = '';
+            cursorPosition = 0;
+
+            if (enteredPass === DASHBOARD_PASSWORD) {
+              sessionStorage.setItem('terminal_auth', 'true');
+              shellMode.current = 'CMD';
+              playRetroBootSound();
+              term.writeln('');
+              term.writeln('\x1b[1;32m[ACCESS GRANTED] Terminal Unlocked.\x1b[0m\r\n');
+              renderBanner(term);
+            } else {
+              term.writeln('');
+              term.writeln('\x1b[1;31m[ACCESS DENIED] Invalid Passcode.\x1b[0m');
+              term.write(AUTH_PROMPT);
+            }
+            break;
+          } else if (char === '\x7F' || char === '\b') {
+            if (cursorPosition > 0) {
+              inputBuffer = inputBuffer.slice(0, cursorPosition - 1);
+              cursorPosition--;
+              term.write('\b \b');
+            }
+          } else if (char >= ' ') {
+            inputBuffer += char;
+            cursorPosition++;
+            term.write('*');
+          }
+        }
+        return;
+      }
 
       if (data === '\x16') {
         navigator.clipboard.readText().then(processPastedString).catch(() => {});
@@ -496,7 +551,7 @@ const TerminalShell = () => {
     const lowerCmd = cmd.toLowerCase();
 
     const isControlCommand = [
-      'clear', 'home', 'help', 'post', 'cancel', 'exit', 'show all'
+      'clear', 'home', 'help', 'post', 'cancel', 'exit', 'show all', 'logout'
     ].includes(lowerCmd) || lowerCmd.startsWith('show ');
 
     if (shellMode.current === 'POSTING') {
@@ -520,6 +575,17 @@ const TerminalShell = () => {
       return;
     }
 
+    if (lowerCmd === 'logout') {
+      sessionStorage.removeItem('terminal_auth');
+      shellMode.current = 'AUTH';
+      term.write('\r\x1b[K');
+      term.clear();
+      term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Session Locked]\x1b[0m');
+      term.writeln('Logged out. Enter password to authenticate.');
+      term.write(AUTH_PROMPT);
+      return;
+    }
+
     if (lowerCmd === 'clear') {
       term.write('\r\x1b[K');
       term.clear();
@@ -531,17 +597,7 @@ const TerminalShell = () => {
       playRetroBootSound();
       term.write('\r\x1b[K');
       term.clear();
-      term.writeln('\x1b[32m  ███  ███  ████     █████ ████   ███   ███  █   █ █████ ████  \x1b[0m');
-      term.writeln('\x1b[32m   █  █   █ █   █      █   █   █ █   █ █     █  █  █     █   █ \x1b[0m');
-      term.writeln('\x1b[32m   █  █   █ ████       █   ████  █████ █     ███   ████  ████  \x1b[0m');
-      term.writeln('\x1b[32m█  █  █   █ █   █      █   █  █  █   █ █     █  █  █     █  █  \x1b[0m');
-      term.writeln('\x1b[32m ██    ███  ████       █   █   █ █   █  ███  █   █ █████ █   █ \x1b[0m');
-      term.writeln('');
-      term.writeln('');
-      term.writeln('\x1b[1;32m[Placement Automation Bot v2.0 - xterm.js Engine]\x1b[0m');
-      term.writeln(`Connected Host: \x1b[36m${API_BASE_URL}\x1b[0m`);
-      term.writeln('Type \x1b[33mhelp\x1b[0m to see available commands.');
-      term.write(PROMPT);
+      renderBanner(term);
       return;
     }
 
@@ -553,6 +609,7 @@ const TerminalShell = () => {
       term.writeln('  \x1b[33mshow <id>\x1b[0m : Fetch detailed JSON payload for a specific job ID');
       term.writeln('  \x1b[33mhome\x1b[0m      : Return to home screen with ASCII banner');
       term.writeln('  \x1b[33mclear\x1b[0m     : Clear the terminal screen');
+      term.writeln('  \x1b[33mlogout\x1b[0m    : Lock terminal CLI and log out');
       term.writeln('  \x1b[33mhelp\x1b[0m      : Show this help menu');
       term.write(PROMPT);
       return;
