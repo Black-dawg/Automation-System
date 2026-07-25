@@ -9,6 +9,62 @@ const DASHBOARD_PASSWORD = import.meta.env.VITE_DASHBOARD_PASSWORD || 'interview
 const NOTION_URL = import.meta.env.VITE_NOTION_URL || 'https://app.notion.com/p/Job-Application-Tracker-9bd515136456828198180166c578cf07';
 const AUTH_PROMPT = '\r\n\x1b[33mPasscode:\x1b[0m ';
 
+// Middle-Left Notion ASCII Hyperlink Component with borderless layout and hover color glow
+const NotionAsciiLink = () => {
+  const [hovered, setHovered] = React.useState(false);
+
+  return (
+    <a 
+      href={NOTION_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cursor-target"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'fixed',
+        top: '360px',
+        left: '36px',
+        zIndex: 100,
+        display: 'block',
+        textDecoration: 'none',
+        padding: '8px',
+        borderRadius: '6px',
+        transition: 'all 0.2s ease',
+        cursor: 'pointer',
+      }}
+    >
+      <pre style={{
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        lineHeight: '1.05',
+        color: hovered ? '#ffffff' : '#27c93f',
+        margin: 0,
+        whiteSpace: 'pre',
+        userSelect: 'none',
+        transition: 'color 0.25s ease, text-shadow 0.25s ease',
+        textShadow: hovered ? '0 0 12px #ffffff, 0 0 20px #ffffff' : '0 0 8px rgba(39, 201, 63, 0.4)',
+      }}>
+{`█  █  ███  █████ █  ███  █  █ ↗
+██░█ █   █   █   █ █   █ ██░█  
+█░██ █   █   █   █ █   █ █░██  
+█  █  ███    █   █  ███  █  █  `}
+      </pre>
+      <div style={{
+        fontFamily: 'monospace',
+        fontSize: '10px',
+        letterSpacing: '3px',
+        color: hovered ? '#ffffff' : 'rgba(39, 201, 63, 0.7)',
+        marginTop: '6px',
+        textTransform: 'uppercase',
+        transition: 'color 0.25s ease',
+      }}>
+        notion dashboard
+      </div>
+    </a>
+  );
+};
+
 // Aero-Grid Radar Canvas component for hardware dashboard visualizer
 const RadarDisplay = () => {
   const canvasRef = useRef(null);
@@ -799,58 +855,8 @@ const TerminalShell = () => {
         ))}
       </div>
 
-      {/* Middle-Left Notion ASCII Hyperlink Box */}
-      <a 
-        href={NOTION_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-target"
-        style={{
-          position: 'fixed',
-          top: '365px',
-          left: '32px',
-          zIndex: 100,
-          display: 'block',
-          textDecoration: 'none',
-          padding: '12px 16px',
-          backgroundColor: '#050505',
-          border: '1px dashed rgba(39, 201, 63, 0.4)',
-          borderRadius: '8px',
-          boxShadow: '0 0 12px rgba(39, 201, 63, 0.1)',
-          transition: 'all 0.2s ease',
-          minWidth: '180px',
-        }}
-      >
-        <div style={{
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          letterSpacing: '3px',
-          color: 'rgba(39, 201, 63, 0.7)',
-          marginBottom: '6px',
-          textTransform: 'uppercase',
-          textAlign: 'center',
-          fontWeight: 'bold'
-        }}>
-          NOTION BOARD ↗
-        </div>
-        <pre style={{
-          fontFamily: 'monospace',
-          fontSize: '11px',
-          lineHeight: '1.1',
-          color: '#27c93f',
-          margin: 0,
-          whiteSpace: 'pre',
-          userSelect: 'none',
-          textAlign: 'center'
-        }}>
-{`┌─────────────┐
-│ █  █  ███   │
-│ ██░█ █   █  │
-│ █░██ █   █  │
-│ █  █  ███   │
-└─────────────┘`}
-        </pre>
-      </a>
+      {/* Middle-Left Notion ASCII Hyperlink */}
+      <NotionAsciiLink />
 
       {/* Bottom-Left BY KJ ASCII Art */}
       <div 
