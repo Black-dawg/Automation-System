@@ -4,7 +4,7 @@ import { FitAddon } from 'xterm-addon-fit';
 import 'xterm/css/xterm.css';
 import TargetCursor from './TargetCursor';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://placement-backend-6y45zizfcq-el.a.run.app').replace(/\/$/, '');
 
 // Aero-Grid Radar Canvas component for hardware dashboard visualizer
 const RadarDisplay = () => {
