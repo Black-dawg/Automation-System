@@ -89,6 +89,7 @@ const RadarDisplay = () => {
     ];
 
     let sweepAngle = -Math.PI / 2;
+    let sweepDirection = 1; // 1 = top-to-bottom, -1 = bottom-to-top
     const SWEEP_SPEED = 0.018;
     let animId;
 
@@ -134,7 +135,7 @@ const RadarDisplay = () => {
       const steps = 80;
       for (let i = 0; i < steps; i++) {
         const t = i / steps;
-        const a = sweepAngle - trailArc * t;
+        const a = sweepAngle - sweepDirection * trailArc * t;
         const alpha = (1 - t) * 0.4;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
@@ -157,9 +158,8 @@ const RadarDisplay = () => {
       blips.forEach(b => {
         const bx = cx + Math.cos(b.a) * R * b.r;
         const by = cy + Math.sin(b.a) * R * b.r;
-        let diff = ((sweepAngle - b.a) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-        if (diff > Math.PI) diff = 0;
-        const alpha = Math.max(0, 1 - diff / (Math.PI * 0.9));
+        let diff = Math.abs(sweepAngle - b.a);
+        const alpha = Math.max(0, 1 - diff / (Math.PI * 0.5));
         if (alpha > 0.02) {
           ctx.beginPath();
           ctx.arc(bx, by, 5, 0, Math.PI * 2);
@@ -195,8 +195,14 @@ const RadarDisplay = () => {
         ctx.fillText(`${deg < 0 ? deg + 180 : deg === 0 ? '090' : deg + 90}°`, lx - 8, ly + 3);
       });
 
-      sweepAngle += SWEEP_SPEED;
-      if (sweepAngle > Math.PI / 2) sweepAngle = -Math.PI / 2;
+      sweepAngle += SWEEP_SPEED * sweepDirection;
+      if (sweepAngle >= Math.PI / 2) {
+        sweepAngle = Math.PI / 2;
+        sweepDirection = -1;
+      } else if (sweepAngle <= -Math.PI / 2) {
+        sweepAngle = -Math.PI / 2;
+        sweepDirection = 1;
+      }
 
       animId = requestAnimationFrame(draw);
     };
