@@ -137,12 +137,12 @@ const RadarDisplay = () => {
     const GREEN = '#27c93f';
 
     let blips = [
-      { a: -0.9, r: 0.42 },
-      { a: 0.4, r: 0.68 },
-      { a: -0.3, r: 0.81 },
-      { a: 1.1, r: 0.55 },
-      { a: 0.0, r: 0.33 },
-      { a: -1.2, r: 0.72 },
+      { a: -0.9, r: 0.42, lastSwept: 0 },
+      { a: 0.4, r: 0.68, lastSwept: 0 },
+      { a: -0.3, r: 0.81, lastSwept: 0 },
+      { a: 1.1, r: 0.55, lastSwept: 0 },
+      { a: 0.0, r: 0.33, lastSwept: 0 },
+      { a: -1.2, r: 0.72, lastSwept: 0 },
     ];
 
     let sweepAngle = -Math.PI / 2;
@@ -212,17 +212,33 @@ const RadarDisplay = () => {
       ctx.stroke();
       ctx.shadowBlur = 0;
 
+      const now = Date.now();
       blips.forEach(b => {
         const bx = cx + Math.cos(b.a) * R * b.r;
         const by = cy + Math.sin(b.a) * R * b.r;
         let diff = Math.abs(sweepAngle - b.a);
+
+        // When radar arm comes into contact with target, trigger 2s red warning pulse
+        if (diff < 0.06) {
+          b.lastSwept = now;
+        }
+
+        const isHotRed = (now - b.lastSwept) < 2000;
         const alpha = Math.max(0, 1 - diff / (Math.PI * 0.5));
         if (alpha > 0.02) {
           ctx.beginPath();
           ctx.arc(bx, by, 5, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(39,201,63,${alpha})`;
-          ctx.shadowColor = GREEN;
-          ctx.shadowBlur = 14 * alpha;
+
+          if (isHotRed) {
+            ctx.fillStyle = `rgba(255, 51, 51, ${alpha})`;
+            ctx.shadowColor = '#ff3333';
+            ctx.shadowBlur = 18 * alpha;
+          } else {
+            ctx.fillStyle = `rgba(247, 202, 24, ${alpha})`;
+            ctx.shadowColor = '#f7ca18';
+            ctx.shadowBlur = 14 * alpha;
+          }
+
           ctx.fill();
           ctx.shadowBlur = 0;
         }
