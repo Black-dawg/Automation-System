@@ -223,7 +223,7 @@ const RadarDisplay = () => {
           b.lastSwept = now;
         }
 
-        const isHotRed = (now - b.lastSwept) < 2000;
+        const isHotRed = (now - b.lastSwept) < 1000;
         const alpha = Math.max(0, 1 - diff / (Math.PI * 0.5));
         if (alpha > 0.02) {
           ctx.beginPath();
