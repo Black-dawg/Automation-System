@@ -89,7 +89,7 @@ const RadarDisplay = () => {
     ];
 
     let sweepAngle = -Math.PI / 2;
-    let sweepDirection = 1; // 1 = top-to-bottom, -1 = bottom-to-top
+    let sweepDirection = 1;
     const SWEEP_SPEED = 0.018;
     let animId;
 
@@ -698,16 +698,38 @@ const TerminalShell = () => {
     if (lowerCmd === 'show all') {
       shellMode.current = 'PROCESSING';
       term.writeln('');
-      term.writeln(`\x1b[36m[SYS]\x1b[0m Connecting to ${API_BASE_URL}...`);
+      term.writeln(`\x1b[36m[SYS]\x1b[0m Connecting to database cluster at ${API_BASE_URL}...`);
+
+      const dummyLogs = [
+        `GET /api/job HTTP/1.1`,
+        `Host: ${API_BASE_URL.replace(/^https?:\/\//, '')}`,
+        `Accept: application/json`,
+        `[SYS] Querying PostgreSQL table 'job_opportunities'...`,
+        `[NET] Fetching record indices...`
+      ];
+
+      let logIdx = 0;
+      const logInterval = setInterval(() => {
+        if (logIdx < dummyLogs.length) {
+          term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+          logIdx++;
+        }
+      }, 300);
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/job`);
+        clearInterval(logInterval);
+        while (logIdx < dummyLogs.length) {
+          term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+          logIdx++;
+        }
+
         if (response.ok) {
           const jobs = await response.json();
           if (jobs.length === 0) {
             term.writeln('\r\n\x1b[33m[WARN]\x1b[0m No records found in database.');
           } else {
-            term.writeln(`\r\n\x1b[1;32m[SUCCESS] Fetched ${jobs.length} job records:\x1b[0m`);
+            term.writeln(`\r\n\x1b[1;32m[SUCCESS] Downloaded ${jobs.length} job records:\x1b[0m`);
             for (const job of jobs) {
               term.writeln(`  [\x1b[33mID: ${job.id}\x1b[0m] \x1b[36m${job.companyName}\x1b[0m - ${job.role || 'N/A'}`);
             }
@@ -716,8 +738,10 @@ const TerminalShell = () => {
           term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m HTTP ${response.status} - Failed to fetch jobs.`);
         }
       } catch (err) {
-        term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Could not connect to backend (${API_BASE_URL}/api/job)`);
+        clearInterval(logInterval);
+        term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Connection refused (${API_BASE_URL}/api/job)`);
       } finally {
+        clearInterval(logInterval);
         shellMode.current = 'CMD';
         term.write(PROMPT);
       }
@@ -735,13 +759,34 @@ const TerminalShell = () => {
 
       shellMode.current = 'PROCESSING';
       term.writeln('');
-      term.writeln(`\x1b[36m[SYS]\x1b[0m Querying database for job ID: ${id}...`);
+      term.writeln(`\x1b[36m[SYS]\x1b[0m Querying database index for UID: ${id}...`);
+
+      const dummyLogs = [
+        `GET /api/job/${id} HTTP/1.1`,
+        `Host: ${API_BASE_URL.replace(/^https?:\/\//, '')}`,
+        `[SYS] Locating primary key ID ${id}...`,
+        `[NET] Decrypting database row payload...`
+      ];
+
+      let logIdx = 0;
+      const logInterval = setInterval(() => {
+        if (logIdx < dummyLogs.length) {
+          term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+          logIdx++;
+        }
+      }, 300);
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/job/${id}`);
+        clearInterval(logInterval);
+        while (logIdx < dummyLogs.length) {
+          term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+          logIdx++;
+        }
+
         if (response.ok) {
           const job = await response.json();
-          term.writeln('\r\n\x1b[1;32m[SUCCESS] Payload received:\x1b[0m\r\n');
+          term.writeln('\r\n\x1b[1;32m[SUCCESS] Payload secured. Initiating decypher protocol...\x1b[0m\r\n');
           const jsonString = JSON.stringify(job, null, 2);
           await typeWriter(term, jsonString, 1);
           term.writeln('\r\n');
@@ -751,8 +796,10 @@ const TerminalShell = () => {
           term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Server returned status ${response.status}.`);
         }
       } catch (err) {
+        clearInterval(logInterval);
         term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Could not connect to backend (${API_BASE_URL}/api/job/${id})`);
       } finally {
+        clearInterval(logInterval);
         shellMode.current = 'CMD';
         term.write(PROMPT);
       }
@@ -778,8 +825,30 @@ const TerminalShell = () => {
     const term = xtermRef.current;
     shellMode.current = 'PROCESSING';
 
+    const hostHeader = API_BASE_URL.replace(/^https?:\/\//, '');
+    const dummyLogs = [
+      `POST /api/job/extract HTTP/1.1`,
+      `Host: ${hostHeader}`,
+      `Content-Type: text/plain`,
+      `User-Agent: TerminalCLI/2.0`,
+      `[SYS] Resolving target cluster... connected.`,
+      `[TLS] Established TLS v1.3 encrypted stream (AES-256-GCM)`,
+      `[LLM] Passing payload to Spring AI / Gemini 2.0 Flash...`,
+      `[NLP] Isolating company, role, stipend & deadline fields...`,
+      `[DB] Writing extracted entity record to PostgreSQL RDS...`,
+      `[NOTION] Transmitting structured properties via REST API...`
+    ];
+
     term.writeln('');
-    term.writeln(`\x1b[36m[Info]\x1b[0m Sending job description to backend (${API_BASE_URL})...`);
+    term.writeln(`\x1b[36m[SYS]\x1b[0m Triggering Placement Extraction Pipeline...`);
+
+    let logIdx = 0;
+    const logInterval = setInterval(() => {
+      if (logIdx < dummyLogs.length) {
+        term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+        logIdx++;
+      }
+    }, 450);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/job/extract`, {
@@ -787,6 +856,14 @@ const TerminalShell = () => {
         headers: { 'Content-Type': 'text/plain' },
         body: jobText
       });
+
+      clearInterval(logInterval);
+
+      // Flush remaining logs
+      while (logIdx < dummyLogs.length) {
+        term.writeln(`\x1b[90m${dummyLogs[logIdx]}\x1b[0m`);
+        logIdx++;
+      }
 
       if (response.status === 201) {
         const data = await response.json();
@@ -801,8 +878,10 @@ const TerminalShell = () => {
         term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m ${errorText}`);
       }
     } catch (err) {
+      clearInterval(logInterval);
       term.writeln(`\r\n\x1b[1;31m[ERROR]\x1b[0m Could not reach backend pipeline (${err.message})`);
     } finally {
+      clearInterval(logInterval);
       shellMode.current = 'CMD';
       term.write(PROMPT);
     }
