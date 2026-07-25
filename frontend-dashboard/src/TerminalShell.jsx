@@ -806,13 +806,24 @@ const TerminalShell = () => {
     }
 
     if (lowerCmd.startsWith('show ')) {
-      let rawId = lowerCmd.split(' ')[1];
-      if (!rawId) {
-        term.writeln('\r\n\x1b[31m[Syntax Error]\x1b[0m Missing ID. Usage: show <id>');
+      const parts = cmd.trim().split(/\s+/);
+      const rawId = parts[1];
+
+      if (!rawId || parts.length > 2) {
+        term.writeln('\r\n\x1b[31m[Syntax Error]\x1b[0m Invalid syntax. Usage: \x1b[33mshow <id>\x1b[0m (e.g. \x1b[36mshow 28\x1b[0m)');
         term.write(PROMPT);
         return;
       }
-      const id = rawId.replace(/[<>]/g, '');
+
+      // Strict validation: must be positive integer digits like "28" or "<28>"
+      const match = rawId.match(/^(?:<(\d+)>|(\d+))$/);
+      if (!match) {
+        term.writeln(`\r\n\x1b[31m[Syntax Error]\x1b[0m Invalid Job ID '\x1b[33m${rawId}\x1b[0m'. Must be a numeric ID (e.g. \x1b[36mshow 28\x1b[0m).`);
+        term.write(PROMPT);
+        return;
+      }
+
+      const id = match[1] || match[2];
 
       shellMode.current = 'PROCESSING';
       term.writeln('');
