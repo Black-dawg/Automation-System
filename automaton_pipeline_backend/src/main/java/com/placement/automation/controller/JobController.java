@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/jobs")
+@RequestMapping("/api/job")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class JobController {
@@ -19,19 +19,32 @@ public class JobController {
 
     @GetMapping
     public ResponseEntity<List<JobOpportunityEntity>> getAllJobs() {
-        List<JobOpportunityEntity> jobs = jobService.getAllJobs();
-        return ResponseEntity.ok(jobs);
+        return ResponseEntity.ok(jobService.getAllJobs());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getJobById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(jobService.getJobById(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PostMapping
     public ResponseEntity<JobOpportunityEntity> createJob(@RequestBody JobOpportunityEntity job) {
-        JobOpportunityEntity created = jobService.createJob(job);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobService.createJob(job));
     }
 
     @PostMapping("/extract")
-    public ResponseEntity<JobOpportunityEntity> extractJob(@RequestBody String rawMessage) {
-        JobOpportunityEntity extracted = jobService.processAndSaveNewJobMessage(rawMessage);
-        return ResponseEntity.status(HttpStatus.CREATED).body(extracted);
+    public ResponseEntity<?> extractJob(@RequestBody String rawMessage) {
+        try {
+            JobOpportunityEntity extracted = jobService.processAndSaveNewJobMessage(rawMessage);
+            return ResponseEntity.status(HttpStatus.CREATED).body(extracted);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 }

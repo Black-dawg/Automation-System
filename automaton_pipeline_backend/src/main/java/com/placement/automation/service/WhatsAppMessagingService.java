@@ -1,5 +1,6 @@
 package com.placement.automation.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class WhatsAppMessagingService {
 
@@ -21,8 +23,9 @@ public class WhatsAppMessagingService {
     @Value("${whatsapp.api.phone-number-id:}")
     private String phoneNumberId;
 
+    // Outbound messenger client for WhatsApp Graph API
     public void sendMessage(String recipientPhoneNumber, String messageText) {
-        if (apiToken == null || apiToken.isEmpty() || phoneNumberId == null || phoneNumberId.isEmpty()) {
+        if (apiToken == null || apiToken.isBlank() || phoneNumberId == null || phoneNumberId.isBlank()) {
             return;
         }
 
@@ -48,7 +51,7 @@ public class WhatsAppMessagingService {
         try {
             restTemplate.postForEntity(url, entity, String.class);
         } catch (Exception e) {
-            System.err.println("Failed to send WhatsApp message: " + e.getMessage());
+            log.error("Failed to send WhatsApp message: {}", e.getMessage());
         }
     }
 }

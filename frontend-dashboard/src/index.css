@@ -1,0 +1,37 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: none !important;
+}
+
+body {
+  background-color: #050505;
+  overflow: hidden;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Remove Xterm Scrollbar */
+.xterm .xterm-viewport::-webkit-scrollbar {
+  display: none !important;
+}
+.xterm .xterm-viewport {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Invisible clickable overlays - fully transparent, no visual effect */
+.hardware-button-overlay {
+  position: absolute;
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  z-index: 20;
+}

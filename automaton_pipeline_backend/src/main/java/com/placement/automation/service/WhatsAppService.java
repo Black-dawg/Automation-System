@@ -12,11 +12,10 @@ public class WhatsAppService {
     private final WhatsAppMessagingService whatsAppMessagingService;
     private final JobService jobService;
 
+    // Process incoming webhook message asynchronously to release webhook thread early
     @Async
     public void processIncomingMessage(String sender, String rawMessage) {
-        boolean isJob = messageFilterService.isJobDescription(rawMessage);
-
-        if (!isJob) {
+        if (!messageFilterService.isJobDescription(rawMessage)) {
             whatsAppMessagingService.sendMessage(sender, "You haven't given a job post message.");
             return;
         }

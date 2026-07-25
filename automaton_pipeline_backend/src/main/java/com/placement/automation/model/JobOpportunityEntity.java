@@ -5,9 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Map;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
 
 @Entity
 @Table(name = "job_opportunities")
@@ -25,7 +26,7 @@ public class JobOpportunityEntity {
     private String role;
     private String offer;
     private String deadline;
-    
+
     @Column(columnDefinition = "TEXT")
     private String eligibilityCriteria;
 
@@ -40,6 +41,7 @@ public class JobOpportunityEntity {
     @Column(columnDefinition = "TEXT")
     private String extraImportantInfo;
 
+    // Mapping factory method from LLM DTO Record to JPA Entity
     public static JobOpportunityEntity from(JobOpportunity record) {
         if (record == null) {
             return null;

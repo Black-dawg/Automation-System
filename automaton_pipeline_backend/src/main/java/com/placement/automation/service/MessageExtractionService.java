@@ -13,6 +13,7 @@ public class MessageExtractionService {
         this.chatClient = chatClientBuilder.build();
     }
 
+    // Extracts structured placement details from unstructured text using Spring AI
     public JobOpportunity extractJobOpportunity(String rawMessage) {
         return this.chatClient.prompt()
                 .system("""

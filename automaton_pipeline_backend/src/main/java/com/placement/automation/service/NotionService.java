@@ -1,35 +1,33 @@
 package com.placement.automation.service;
 
 import com.placement.automation.model.JobOpportunityEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class NotionService {
 
-    @Value("${notion.api.token}")
+    @Value("${notion.api.token:}")
     private String notionApiToken;
 
-    @Value("${notion.api.database.id}")
+    @Value("${notion.api.database.id:}")
     private String notionDatabaseId;
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    public NotionService() {
-        this.restTemplate = new RestTemplate();
-    }
-
+    // Syncs extracted job details into configured Notion database table
     public void syncJobToNotion(JobOpportunityEntity job) {
-        if (notionApiToken == null || notionApiToken.trim().isEmpty() || notionApiToken.contains("YOUR_NOTION_INTEGRATION_TOKEN")) {
+        if (notionApiToken == null || notionApiToken.isBlank() || notionApiToken.contains("YOUR_NOTION_INTEGRATION_TOKEN")) {
             return;
         }
 
@@ -41,38 +39,43 @@ public class NotionService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> body = new HashMap<>();
-
         Map<String, Object> parent = new HashMap<>();
         parent.put("database_id", notionDatabaseId);
         body.put("parent", parent);
 
         Map<String, Object> properties = new HashMap<>();
-
-        if (job.getCompanyName() != null)
+        if (job.getCompanyName() != null) {
             properties.put("Company", createTitleProperty(job.getCompanyName()));
-        if (job.getRole() != null)
+        }
+        if (job.getRole() != null) {
             properties.put("Role", createRichTextProperty(job.getRole()));
-        if (job.getEligibilityCriteria() != null)
+        }
+        if (job.getEligibilityCriteria() != null) {
             properties.put("Eligibility", createRichTextProperty(job.getEligibilityCriteria()));
-        if (job.getApplicationLinks() != null && !job.getApplicationLinks().isEmpty())
+        }
+        if (job.getApplicationLinks() != null && !job.getApplicationLinks().isEmpty()) {
             properties.put("Form", createRichTextProperty(formatLinks(job.getApplicationLinks())));
-        if (job.getWhatsappGroupLinks() != null && !job.getWhatsappGroupLinks().isEmpty())
+        }
+        if (job.getWhatsappGroupLinks() != null && !job.getWhatsappGroupLinks().isEmpty()) {
             properties.put("WhatsApp", createRichTextProperty(formatLinks(job.getWhatsappGroupLinks())));
-        if (job.getExtraImportantInfo() != null)
+        }
+        if (job.getExtraImportantInfo() != null) {
             properties.put("Extra Info", createRichTextProperty(job.getExtraImportantInfo()));
-        if (job.getDeadline() != null)
+        }
+        if (job.getDeadline() != null) {
             properties.put("DeadLine", createRichTextProperty(job.getDeadline()));
-        if (job.getOffer() != null)
+        }
+        if (job.getOffer() != null) {
             properties.put("Offer", createRichTextProperty(job.getOffer()));
+        }
 
         body.put("properties", properties);
-
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
             restTemplate.exchange(url, HttpMethod.POST, request, String.class);
         } catch (Exception e) {
-            System.err.println("Failed to sync to Notion: " + e.getMessage());
+            log.error("Failed to sync job to Notion: {}", e.getMessage());
         }
     }
 
@@ -93,22 +96,6 @@ public class NotionService {
         textObj.put("content", text);
         rtObj.put("text", textObj);
         prop.put("rich_text", new Object[]{rtObj});
-        return prop;
-    }
-
-    private Map<String, Object> createStatusProperty(String name) {
-        Map<String, Object> prop = new HashMap<>();
-        Map<String, Object> statusObj = new HashMap<>();
-        statusObj.put("name", name);
-        prop.put("status", statusObj);
-        return prop;
-    }
-
-    private Map<String, Object> createDateProperty(String date) {
-        Map<String, Object> prop = new HashMap<>();
-        Map<String, Object> dateObj = new HashMap<>();
-        dateObj.put("start", date);
-        prop.put("date", dateObj);
         return prop;
     }
 
