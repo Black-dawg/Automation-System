@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import 'xterm/css/xterm.css';
@@ -403,6 +403,7 @@ const playRetroBootSound = () => {
     });
   } catch (e) {}
 };
+
 
 const TerminalShell = () => {
   const terminalRef = useRef(null);
@@ -1078,11 +1079,11 @@ const TerminalShell = () => {
 
         <div style={{
           position: 'absolute',
-          top: '14%',     
-          left: '15.2%',    
-          width: '68%',    
-          height: '46%', 
-          backgroundColor: '#050505', 
+          top: '14%',
+          left: '15.2%',
+          width: '68%',
+          height: '46%',
+          backgroundColor: '#050505',
           padding: '15px',
           overflow: 'hidden',
           borderRadius: '10px'
