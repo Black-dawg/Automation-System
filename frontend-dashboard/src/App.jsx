@@ -9,9 +9,12 @@ function App() {
   return (
     <>
       {!loaded && <RetroLoader onDone={() => setLoaded(true)} />}
-      <div style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.5s ease' }}>
-        <TerminalShell />
-      </div>
+      {loaded && (
+        <div style={{ animation: 'fadeIn 0.5s ease' }}>
+          <TerminalShell />
+          <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+        </div>
+      )}
     </>
   );
 }
