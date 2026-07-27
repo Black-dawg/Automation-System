@@ -26,6 +26,13 @@ body {
   scrollbar-width: none !important;
 }
 
+/* Hide overlapping fixed side panels on small/narrow screens */
+@media (max-width: 1320px) {
+  .side-panel-hide-mobile {
+    display: none !important;
+  }
+}
+
 /* Invisible clickable overlays - fully transparent, no visual effect */
 .hardware-button-overlay {
   position: absolute;

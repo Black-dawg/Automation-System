@@ -18,7 +18,7 @@ const NotionAsciiLink = () => {
       href={NOTION_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="cursor-target"
+      className="cursor-target side-panel-hide-mobile"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -72,7 +72,7 @@ const ByKjAscii = () => {
 
   return (
     <div 
-      className="cursor-target"
+      className="cursor-target side-panel-hide-mobile"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -463,7 +463,14 @@ const TerminalShell = () => {
 
     const runFitAndScroll = () => {
       try {
-        if (fitAddon) {
+        if (fitAddon && terminalRef.current && term) {
+          const width = terminalRef.current.clientWidth;
+          if (width > 0) {
+            const idealFont = Math.max(9, Math.min(15, Math.floor((width / 520) * 15)));
+            if (term.options.fontSize !== idealFont) {
+              term.options.fontSize = idealFont;
+            }
+          }
           fitAddon.fit();
           if (shellMode.current === 'AUTH') {
             term.scrollToTop();
@@ -1023,7 +1030,7 @@ const TerminalShell = () => {
       />
 
       {/* Top-Left Control Map Panel */}
-      <div style={{
+      <div className="side-panel-hide-mobile" style={{
         position: 'fixed',
         top: '32px',
         left: '32px',
