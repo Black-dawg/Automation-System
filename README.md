@@ -1,13 +1,62 @@
 # Job Application Automation System
 
-An automation system designed to streamline job application workflows. It consists of two major components:
+A streamlined, AI-powered placement and job application automation suite. Designed to automate job extraction, tracking, and intelligent form autofilling using local LLMs.
 
-1. **Job Application Automation Backend**: A Spring Boot service that leverages AI to extract job opportunities and announcements and sync them to platforms like Notion, easing tracking, analytics, and management of applications.
-2. **FormGlitch**: A Chrome extension that uses Local LLMs (via Ollama) to parse candidate resumes and automatically fill out job application forms.
+---
 
-## Project Structure
+## 🚀 Key Modules
 
-- **`automaton_pipeline_backend/`**: Spring Boot application representing the main job application tracking and integration backend.
-- **`FormGlitch/`**:
-  - `chrome-extension/`: Chrome extension designed to scan and populate input fields on job application forms.
-  - `extension-backend/`: Standalone Spring Boot helper service that uses local LLMs (via Ollama) to parse resumes and generate context-aware autofill responses.
+- **`automaton_pipeline_backend/`**  
+  Spring Boot backend service that extracts job announcements, parses placement metadata, and syncs opportunities with tracking platforms (e.g., Notion).
+
+- **`frontend-dashboard/`**  
+  React + Vite modern web dashboard for tracking job applications, viewing pipeline analytics, and monitoring real-time logs.
+
+- **`FormGlitch/`**  
+  - **`chrome-extension/`**: Smart Chrome extension that detects and populates fields on job application portals.
+  - **`extension-backend/`**: Spring Boot helper leveraging local LLMs (via Ollama) to parse resumes and provide context-aware response generation.
+
+---
+
+## 🛠️ Tech Stack
+
+| Domain | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, Vite, GSAP, Xterm.js |
+| **Backend** | Java, Spring Boot, REST APIs, Docker |
+| **AI / Automation** | Ollama (Local LLMs), Chrome Extension API |
+| **Integrations** | Notion API, Custom Pipeline Connectors |
+
+---
+
+## ⚡ Quick Start
+
+### 1. Backend Service
+```bash
+cd automaton_pipeline_backend
+./mvnw spring-boot:run
+```
+
+### 2. Frontend Dashboard
+```bash
+cd frontend-dashboard
+npm install
+npm run dev
+```
+
+### 3. FormGlitch Extension & Backend
+```bash
+# Extension Helper Backend
+cd FormGlitch/extension-backend
+./mvnw spring-boot:run
+
+# Chrome Extension
+# Navigate to chrome://extensions -> Enable Developer Mode -> Load unpacked -> Select FormGlitch/chrome-extension
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+

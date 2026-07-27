@@ -439,7 +439,7 @@ const TerminalShell = () => {
 
   const renderAuthScreen = (term) => {
     renderAsciiArt(term);
-    term.writeln('\x1b[1;36m[SECURITY GATEWAY v1.0 - Authentication Required]\x1b[0m');
+    term.writeln('\x1b[1;36m[Authentication Required]\x1b[0m');
     term.writeln('Terminal shell is password protected.');
     term.write(AUTH_PROMPT);
   };
@@ -465,12 +465,19 @@ const TerminalShell = () => {
       try {
         if (terminalRef.current && fitAddon) {
           fitAddon.fit();
+          term.scrollToTop();
         }
       } catch (e) {}
     }, 50);
 
     xtermRef.current = term;
     fitAddonRef.current = fitAddon;
+
+    try {
+      if (terminalRef.current && fitAddon) {
+        fitAddon.fit();
+      }
+    } catch (e) {}
 
     const isAuthed = sessionStorage.getItem('terminal_auth') === 'true';
     if (isAuthed) {
@@ -479,6 +486,7 @@ const TerminalShell = () => {
     } else {
       shellMode.current = 'AUTH';
       renderAuthScreen(term);
+      term.scrollToTop();
     }
 
     const handleResize = () => {
@@ -587,10 +595,7 @@ const TerminalShell = () => {
               renderBanner(term);
             } else {
               term.writeln('');
-              term.writeln('\x1b[90m[SEC] Authentication handshake initiated...\x1b[0m');
-              term.writeln('\x1b[90m[CRYPTO] Verifying SHA-256 password digest...\x1b[0m');
-              term.writeln('\x1b[1;31m[ACCESS DENIED]\x1b[0m Invalid Passcode Credentials.');
-              term.writeln('\x1b[90m[ABORT] Security protocol engaged. Retry passcode.\x1b[0m');
+              term.writeln('\x1b[1;31m[ACCESS DENIED]\x1b[0m Incorrect passcode.');
               term.write(AUTH_PROMPT);
             }
             break;
