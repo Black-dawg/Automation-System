@@ -9,7 +9,7 @@ const DASHBOARD_PASSWORD = import.meta.env.VITE_DASHBOARD_PASSWORD || 'interview
 const NOTION_URL = import.meta.env.VITE_NOTION_URL || 'https://app.notion.com/p/Job-Application-Tracker-9bd515136456828198180166c578cf07';
 const AUTH_PROMPT = '\r\n\x1b[33mPasscode:\x1b[0m ';
 
-// Middle-Left Notion ASCII Hyperlink Component with glowing white hover shine
+// Notion link component
 const NotionAsciiLink = () => {
   const [hovered, setHovered] = React.useState(false);
 
@@ -66,7 +66,7 @@ const NotionAsciiLink = () => {
   );
 };
 
-// Bottom-Left BY KJ ASCII Art Component with glowing white hover shine
+// BY KJ ASCII Component
 const ByKjAscii = () => {
   const [hovered, setHovered] = React.useState(false);
 
@@ -122,7 +122,7 @@ const ByKjAscii = () => {
   );
 };
 
-// Aero-Grid Radar Canvas component for hardware dashboard visualizer
+// Radar display widget
 const RadarDisplay = () => {
   const canvasRef = useRef(null);
 
