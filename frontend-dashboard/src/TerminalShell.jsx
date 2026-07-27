@@ -461,23 +461,31 @@ const TerminalShell = () => {
     term.loadAddon(fitAddon);
     term.open(terminalRef.current);
 
-    setTimeout(() => {
+    const runFitAndScroll = () => {
       try {
-        if (terminalRef.current && fitAddon) {
+        if (fitAddon) {
           fitAddon.fit();
-          term.scrollToTop();
+          if (shellMode.current === 'AUTH') {
+            term.scrollToTop();
+          }
         }
       } catch (e) {}
-    }, 50);
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      runFitAndScroll();
+    });
+
+    if (terminalRef.current) {
+      resizeObserver.observe(terminalRef.current);
+    }
+
+    [0, 50, 150, 350].forEach(delay => {
+      setTimeout(runFitAndScroll, delay);
+    });
 
     xtermRef.current = term;
     fitAddonRef.current = fitAddon;
-
-    try {
-      if (terminalRef.current && fitAddon) {
-        fitAddon.fit();
-      }
-    } catch (e) {}
 
     const isAuthed = sessionStorage.getItem('terminal_auth') === 'true';
     if (isAuthed) {
@@ -490,9 +498,7 @@ const TerminalShell = () => {
     }
 
     const handleResize = () => {
-      try {
-        if (fitAddon) fitAddon.fit();
-      } catch (e) {}
+      runFitAndScroll();
     };
     window.addEventListener('resize', handleResize);
 
@@ -696,6 +702,7 @@ const TerminalShell = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('paste', handleWindowPaste);
+      resizeObserver.disconnect();
       term.dispose();
     };
   }, []);
@@ -1073,6 +1080,16 @@ const TerminalShell = () => {
         <img 
           src="/nasa.PNG" 
           alt="Hardware Console" 
+          onLoad={() => {
+            try {
+              if (fitAddonRef.current) {
+                fitAddonRef.current.fit();
+                if (shellMode.current === 'AUTH') {
+                  xtermRef.current?.scrollToTop();
+                }
+              }
+            } catch (e) {}
+          }}
           style={{ 
             width: '850px', 
             maxWidth: '100%', 
