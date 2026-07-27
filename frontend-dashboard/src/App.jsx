@@ -1,10 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TerminalShell from './TerminalShell';
 import RetroLoader from './RetroLoader';
 import './index.css';
 
 function App() {
   const [loaded, setLoaded] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = new Audio('/moodmode-retro-game-arcade-236133.mp3');
+    audio.loop = true;
+    audio.volume = 0.12; // subtle background volume
+    audioRef.current = audio;
+
+    const startAudio = () => {
+      audio.play().catch(() => {});
+    };
+
+    // Attempt autoplay immediately
+    audio.play().catch(() => {
+      // Handle browser autoplay policy by starting on first user interaction
+      window.addEventListener('click', startAudio, { once: true });
+      window.addEventListener('keydown', startAudio, { once: true });
+    });
+
+    return () => {
+      window.removeEventListener('click', startAudio);
+      window.removeEventListener('keydown', startAudio);
+      audio.pause();
+    };
+  }, []);
 
   return (
     <>
