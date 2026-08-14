@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     const audio = new Audio('/moodmode-retro-game-arcade-236133.mp3');
     audio.loop = true;
-    audio.volume = 0.02; // ultra-low background ambient volume (2%)
+    audio.volume = 0.08; // background ambient volume (8%)
     audioRef.current = audio;
 
     const startAudio = () => {

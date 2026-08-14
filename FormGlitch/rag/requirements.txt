@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+pymupdf==1.24.4
+SQLAlchemy==2.0.31
+psycopg[binary]==3.2.1
+pydantic==2.8.2
+requests==2.32.3
+langchain==0.2.14
+langchain-community==0.2.12
+langchain-postgres==0.0.12

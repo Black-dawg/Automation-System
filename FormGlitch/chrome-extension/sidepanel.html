@@ -74,18 +74,18 @@
       </div>
       
       <div class="action-row">
-        <button id="viewJsonBtn" class="icon-btn" title="View Profile Data" style="display: none;">
+        <button id="viewJsonBtn" class="icon-btn" title="View / Verify JSON Profile">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
-        <button id="downloadJsonBtn" class="icon-btn" title="Download Profile Data" style="display: none;">
+        <button id="downloadJsonBtn" class="icon-btn" title="Download JSON Profile">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
         </button>
-        <button id="clearCacheBtn" class="icon-btn" title="Clear Profile Data" style="display: none;">
+        <button id="clearCacheBtn" class="icon-btn" title="Clear Profile Cache">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
           </svg>
@@ -124,11 +124,17 @@
   <div id="jsonModal" class="modal-overlay" aria-hidden="true" role="dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Cached Profile Data</h3>
-        <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
+        <h3 id="modalTitle">Cached Profile Data</h3>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="copyJsonBtn" class="modal-action-btn" title="Copy JSON to Clipboard">Copy</button>
+          <button id="editJsonBtn" class="modal-action-btn" title="Edit JSON">Edit</button>
+          <button id="saveJsonModalBtn" class="modal-action-btn primary-action" style="display: none;" title="Save JSON Changes">Save</button>
+          <button id="closeModalBtn" class="close-btn" aria-label="Close modal">&times;</button>
+        </div>
       </div>
       <div class="modal-body">
         <pre><code id="jsonDisplay"></code></pre>
+        <textarea id="jsonEditor" class="json-editor-textarea" style="display: none;"></textarea>
       </div>
     </div>
   </div>

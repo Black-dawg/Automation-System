@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('jsonModal');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const modalPre = document.getElementById('jsonDisplay');
+  const copyJsonBtn = document.getElementById('copyJsonBtn');
+  const editJsonBtn = document.getElementById('editJsonBtn');
+  const saveJsonModalBtn = document.getElementById('saveJsonModalBtn');
+  const jsonEditor = document.getElementById('jsonEditor');
   const openLinkBtn = document.getElementById('openLinkBtn');
   const fileLabel = document.querySelector('.file-upload-text');
   const themeBtn = document.getElementById('themeToggleBtn');
@@ -142,10 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
       fileStatus.textContent = "No file selected";
     }
     
-    const showJsonActions = currentProfile.cachedProfile ? 'flex' : 'none';
-    viewJsonBtn.style.display = showJsonActions;
-    downloadJsonBtn.style.display = showJsonActions;
-    clearCacheBtn.style.display = showJsonActions;
+    const hasCache = !!currentProfile.cachedProfile;
+    viewJsonBtn.classList.toggle('empty-state', !hasCache);
+    downloadJsonBtn.classList.toggle('empty-state', !hasCache);
+    clearCacheBtn.classList.toggle('empty-state', !hasCache);
     
     resumeFileInput.value = '';
     checkSync();
@@ -342,7 +346,10 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errText || 'Extraction failed');
       }
 
-      const extractedJson = await response.text();
+      const extractedJson = (await response.text()).trim();
+      if (!extractedJson || extractedJson === '{}' || extractedJson === '') {
+        throw new Error("AI returned empty profile data. Check Ollama model / backend logs.");
+      }
       profiles[activeTabId].cachedProfile = extractedJson;
       profiles[activeTabId].lastParsedBase64 = currentProfile.base64;
       profiles[activeTabId].lastParsedPreset = currentPreset;
@@ -361,38 +368,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
   viewJsonBtn.addEventListener('click', () => {
     const currentProfile = profiles[activeTabId];
-    if (currentProfile?.cachedProfile) {
-      try {
-        const obj = JSON.parse(currentProfile.cachedProfile);
-        modalPre.textContent = JSON.stringify(obj, null, 2);
-      } catch (error) {
-        modalPre.textContent = currentProfile.cachedProfile;
-      }
-      modal.style.display = 'flex';
+    if (!currentProfile?.cachedProfile) {
+      notify('No cached JSON profile yet. Click "Sync Profile" to generate it!', 'error');
+      return;
     }
+    try {
+      const obj = JSON.parse(currentProfile.cachedProfile);
+      modalPre.textContent = JSON.stringify(obj, null, 2);
+    } catch (error) {
+      modalPre.textContent = currentProfile.cachedProfile;
+    }
+    modalPre.style.display = 'block';
+    jsonEditor.style.display = 'none';
+    editJsonBtn.textContent = 'Edit';
+    saveJsonModalBtn.style.display = 'none';
+    modal.style.display = 'flex';
   });
 
   downloadJsonBtn.addEventListener('click', () => {
     const currentProfile = profiles[activeTabId];
-    if (currentProfile?.cachedProfile) {
-      const blob = new Blob([currentProfile.cachedProfile], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const safeName = (currentProfile.name || `Profile_${activeTabId}`).replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      link.download = `${safeName}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+    if (!currentProfile?.cachedProfile) {
+      notify('No cached JSON profile yet. Click "Sync Profile" to generate it!', 'error');
+      return;
     }
+    const blob = new Blob([currentProfile.cachedProfile], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const safeName = (currentProfile.name || `Profile_${activeTabId}`).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.download = `${safeName}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   });
 
   clearCacheBtn.addEventListener('click', () => {
+    const currentProfile = profiles[activeTabId];
+    if (!currentProfile?.cachedProfile) {
+      notify('No profile cache to clear!', 'error');
+      return;
+    }
     profiles[activeTabId] = createDefaultProfile(profiles[activeTabId].name);
     chrome.storage.local.set({ resumes: profiles }, () => {
       refreshUI();
       notify('Profile cache cleared!', 'success');
     });
   });
+
+  if (copyJsonBtn) {
+    copyJsonBtn.addEventListener('click', () => {
+      const currentProfile = profiles[activeTabId];
+      if (currentProfile?.cachedProfile) {
+        navigator.clipboard.writeText(currentProfile.cachedProfile).then(() => {
+          notify('JSON copied to clipboard!', 'success');
+        }).catch(() => {
+          notify('Failed to copy JSON', 'error');
+        });
+      }
+    });
+  }
+
+  if (editJsonBtn) {
+    editJsonBtn.addEventListener('click', () => {
+      const isEditing = jsonEditor.style.display === 'block';
+      if (!isEditing) {
+        jsonEditor.value = modalPre.textContent;
+        modalPre.style.display = 'none';
+        jsonEditor.style.display = 'block';
+        editJsonBtn.textContent = 'Cancel';
+        saveJsonModalBtn.style.display = 'inline-block';
+      } else {
+        modalPre.style.display = 'block';
+        jsonEditor.style.display = 'none';
+        editJsonBtn.textContent = 'Edit';
+        saveJsonModalBtn.style.display = 'none';
+      }
+    });
+  }
+
+  if (saveJsonModalBtn) {
+    saveJsonModalBtn.addEventListener('click', () => {
+      try {
+        const parsed = JSON.parse(jsonEditor.value);
+        const formatted = JSON.stringify(parsed, null, 2);
+        profiles[activeTabId].cachedProfile = formatted;
+        chrome.storage.local.set({ resumes: profiles }, () => {
+          modalPre.textContent = formatted;
+          modalPre.style.display = 'block';
+          jsonEditor.style.display = 'none';
+          editJsonBtn.textContent = 'Edit';
+          saveJsonModalBtn.style.display = 'none';
+          refreshUI();
+          notify('JSON profile updated and saved!', 'success');
+        });
+      } catch (err) {
+        notify('Invalid JSON syntax! Please check formatting before saving.', 'error');
+      }
+    });
+  }
 
   closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
   modal.addEventListener('click', (e) => {
