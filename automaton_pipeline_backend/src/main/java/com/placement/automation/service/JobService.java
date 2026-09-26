@@ -32,6 +32,7 @@ public class JobService {
         return saved;
     }
 
+    // Pipeline runner: filters raw text, extracts structured fields using LLM, saves to DB & syncs Notion
     public JobOpportunityEntity processAndSaveNewJobMessage(String rawMessage) {
         if (!messageFilterService.isJobDescription(rawMessage)) {
             throw new IllegalArgumentException("You haven't given a job post message.");

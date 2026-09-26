@@ -28,6 +28,7 @@ public class NotionService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // Syncs extracted job details into configured Notion database table
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void syncJobToNotion(JobOpportunityEntity job) {
         if (notionApiToken == null || notionApiToken.isBlank() || notionApiToken.contains("YOUR_NOTION_INTEGRATION_TOKEN")) {
