@@ -12,6 +12,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ public class NotionService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     // Syncs extracted job details into configured Notion database table
+    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void syncJobToNotion(JobOpportunityEntity job) {
         if (notionApiToken == null || notionApiToken.isBlank() || notionApiToken.contains("YOUR_NOTION_INTEGRATION_TOKEN")) {
             return;
@@ -72,11 +76,12 @@ public class NotionService {
         body.put("properties", properties);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        try {
-            restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        } catch (Exception e) {
-            log.error("Failed to sync job to Notion: {}", e.getMessage());
-        }
+        restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+    }
+
+    @Recover
+    public void recover(Exception e, JobOpportunityEntity job) {
+        log.error("Failed to sync job to Notion after retries: {}", e.getMessage());
     }
 
     private Map<String, Object> createTitleProperty(String text) {
